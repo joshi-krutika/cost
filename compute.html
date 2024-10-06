@@ -1,0 +1,367 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Computed Subgraph</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js"></script>
+    <style>
+        #container {
+            display: flex;
+        }
+        #cy {
+            width: 50%;
+            height: 100vh;
+            border: 1px solid black;
+        }
+        #table-container {
+            width: 50%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="cy"></div>
+        <div id="table-container">
+            <h2>Optimization Result</h2>
+            <table id="result-table">
+                <thead>
+                    <tr>
+                        <th>Benefit</th>
+                        <th>Chosen Ingredient</th>
+                        <th>Cost</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var selectedData = JSON.parse(localStorage.getItem('selectedData'));
+            if (!selectedData) {
+                alert('No data found.');
+                return;
+            }
+
+            var cy = cytoscape({
+                container: document.getElementById('cy'),
+                elements: [],
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'label': function(ele) {
+                                return ele.data('id') + ' (' + ele.data('cost') + ')';
+                            },
+                            'background-color': function(ele) {
+                                return ele.data('group') === 'ing' ? '#61bffc' : '#f56d6d';
+                            }
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 3,
+                            'line-color': '#ccc',
+                        }
+                    },
+                    {
+                        selector: '.highlight_output',
+                        style: {
+                            'background-color': 'black'
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'grid',
+                }
+            });
+
+            fetch('/graph_elements')
+                .then(response => response.json())
+                .then(graphData => {
+                    cy.add(graphData.nodes);
+                    cy.add(graphData.edges);
+
+                    function createSubgraph(benefitIds) {
+                        var subgraphNodes = cy.collection();
+                        benefitIds.forEach(benefitId => {
+                            var benefitNode = cy.getElementById(benefitId);
+                            subgraphNodes = subgraphNodes.union(benefitNode.neighborhood()).union(benefitNode);
+                        });
+
+                        cy.elements().hide();
+                        subgraphNodes.show();
+
+                        cy.layout({ name: 'grid' }).run();
+                    }
+
+                    createSubgraph(Object.keys(selectedData.results));
+                })
+                .catch(error => console.error('Error:', error));
+
+            var resultTableBody = document.getElementById('result-table').querySelector('tbody');
+            Object.keys(selectedData.results).forEach(benefit => {
+                var data = selectedData.results[benefit];
+                data.selected_neighbors.forEach((nodeId, index) => {
+                    var row = document.createElement('tr');
+                    var benefitCell = document.createElement('td');
+                    var ingredientCell = document.createElement('td');
+                    var costCell = document.createElement('td');
+
+                    benefitCell.textContent = benefit;
+                    ingredientCell.textContent = nodeId;
+                    costCell.textContent = data.costs[index];
+
+                    row.appendChild(benefitCell);
+                    row.appendChild(ingredientCell);
+                    row.appendChild(costCell);
+                    resultTableBody.appendChild(row);
+                });
+            });
+        });
+    </script>
+</body>
+</html> -->
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Optimization Result</title>
+    <style>
+        #table-container {
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div id="table-container">
+        <h2>Optimization Result</h2>
+        <table id="result-table">
+            <thead>
+                <tr>
+                    <th>Benefit</th>
+                    <th>Chosen Ingredient</th>
+                    <th>Cost</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var selectedData = JSON.parse(localStorage.getItem('selectedData'));
+            if (!selectedData) {
+                alert('No data found.');
+                return;
+            }
+
+            var resultTableBody = document.getElementById('result-table').querySelector('tbody');
+            Object.keys(selectedData.results).forEach(benefit => {
+                var data = selectedData.results[benefit];
+                data.selected_neighbors.forEach((nodeId, index) => {
+                    var row = document.createElement('tr');
+                    var benefitCell = document.createElement('td');
+                    var ingredientCell = document.createElement('td');
+                    var costCell = document.createElement('td');
+
+                    benefitCell.textContent = benefit;
+                    ingredientCell.textContent = nodeId;
+                    costCell.textContent = data.costs[index];
+
+                    row.appendChild(benefitCell);
+                    row.appendChild(ingredientCell);
+                    row.appendChild(costCell);
+                    resultTableBody.appendChild(row);
+                });
+            });
+        });
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Optimization Result</title>
+    <style>
+        #table-container {
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        #sankey-container {
+            width: 100%;
+            height: 600px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="table-container">
+        <h2>Optimization Result</h2>
+        <table id="result-table">
+            <thead>
+                <tr>
+                    <th>Benefit</th>
+                    <th>Chosen Ingredient</th>
+                    <th>Cost</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="sankey-container"></div>
+
+    <!-- Load D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var selectedData = JSON.parse(localStorage.getItem('selectedData'));
+            if (!selectedData) {
+                alert('No data found.');
+                return;
+            }
+
+            // Fill the table with data
+            var resultTableBody = document.getElementById('result-table').querySelector('tbody');
+            var sankeyData = {
+                nodes: [],
+                links: []
+            };
+            var nodeMap = {};
+
+            Object.keys(selectedData.results).forEach(benefit => {
+                var data = selectedData.results[benefit];
+                data.selected_neighbors.forEach((ingredient, index) => {
+                    var row = document.createElement('tr');
+                    var benefitCell = document.createElement('td');
+                    var ingredientCell = document.createElement('td');
+                    var costCell = document.createElement('td');
+
+                    benefitCell.textContent = benefit;
+                    ingredientCell.textContent = ingredient;
+                    costCell.textContent = data.costs[index];
+
+                    row.appendChild(benefitCell);
+                    row.appendChild(ingredientCell);
+                    row.appendChild(costCell);
+                    resultTableBody.appendChild(row);
+
+                    // Add nodes to Sankey data
+                    if (!nodeMap[benefit]) {
+                        nodeMap[benefit] = sankeyData.nodes.length;
+                        sankeyData.nodes.push({ name: benefit });
+                    }
+                    if (!nodeMap[ingredient]) {
+                        nodeMap[ingredient] = sankeyData.nodes.length;
+                        sankeyData.nodes.push({ name: ingredient });
+                    }
+
+                    // Add link (flow) between benefit and ingredient
+                    sankeyData.links.push({
+                        source: nodeMap[benefit],
+                        target: nodeMap[ingredient],
+                        value: data.costs[index] // You can also use a different value (like occurrence count)
+                    });
+                });
+            });
+
+            // Draw the Sankey diagram
+            var svg = d3.select("#sankey-container").append("svg")
+                .attr("width", 960)
+                .attr("height", 600);
+
+            var sankey = d3.sankey()
+                .nodeWidth(36)
+                .nodePadding(10)
+                .size([960, 600]);
+
+            var { nodes, links } = sankey(sankeyData);
+
+            // Create the links (flows)
+            var link = svg.append("g")
+                .selectAll(".link")
+                .data(links)
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("d", d3.sankeyLinkHorizontal())
+                .attr("stroke-width", d => Math.max(1, d.width))
+                .style("stroke", "#69b3a2")
+                .style("fill", "none")
+                .style("stroke-opacity", 0.5);
+
+            // Create the nodes
+            var node = svg.append("g")
+                .selectAll(".node")
+                .data(nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+            // Add rectangles for nodes
+            node.append("rect")
+                .attr("height", d => d.y1 - d.y0)
+                .attr("width", sankey.nodeWidth())
+                .style("fill", d => d.color = d3.color(d3.schemeCategory10[Math.floor(Math.random() * 10)]))
+                .style("stroke", "none");
+
+            // Add text labels
+            node.append("text")
+                .attr("x", d => d.x0 < 960 / 2 ? 6 + sankey.nodeWidth() : -6)
+                .attr("y", d => (d.y1 - d.y0) / 2)
+                .attr("dy", "0.35em")
+                .attr("text-anchor", d => d.x0 < 960 / 2 ? "start" : "end")
+                .text(d => d.name);
+        });
+    </script>
+</body>
+</html>
