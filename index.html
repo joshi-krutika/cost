@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Benefits</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/select2.min.css') }}">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,48 +41,31 @@
         </select>
         <button id="compute">Compute</button>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="{{ url_for('static', filename='jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='select2.js') }}"></script>
     <script>
         $(document).ready(function() {
             // Fetch benefits from the server
             fetch('/benefits')
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Received response from /benefits:', response);  // Log the raw response object
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Parsed JSON data:', data);  // Log the parsed JSON data
+
                     data.forEach(benefit => {
+                        console.log(`Processing benefit: `, benefit);  // Log each benefit object
                         $('#benefit-select').append(`<option value="${benefit.id}">${benefit.id}</option>`);
+                        console.log(`Appended option with id: ${benefit.id} to #benefit-select`);  // Confirm the append operation
                     });
-                    // Initialize select2 for the dropdown
+
+                    console.log('All benefits added to #benefit-select. Initializing select2...');
                     $('#benefit-select').select2();
                 })
-                .catch(error => console.error('Error fetching benefits:', error));
-
-            // Handle the compute button click
-            $('#compute').on('click', function() {
-                var selectedBenefits = $('#benefit-select').val();
-                if (selectedBenefits.length === 0) {
-                    alert('Please select at least one benefit.');
-                    return;
-                }
-
-                // Send selected benefits to the server
-                fetch('/subgraph', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ benefits: selectedBenefits })
-                })
-                .then(response => {
-                    if (response.ok) {
-                        window.location.href = '/compute';
-                    } else {
-                        alert('Error processing your request.');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            });
+                .catch(error => {
+                    console.error('Error fetching benefits:', error);  // Log any errors that occur during the fetch process
+                });
         });
     </script>
 </body>
